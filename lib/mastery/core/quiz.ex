@@ -117,6 +117,8 @@ defmodule Mastery.Core.Quiz do
     }
   end
 
+  defp reset_template_cycle(quiz), do: quiz
+
   defp inc_record(%{current_question: question} = quiz) do
     new_record = Map.update(quiz.record, question.template.name, 1, &(&1 + 1))
     Map.put(quiz, :record, new_record)
