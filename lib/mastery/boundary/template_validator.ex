@@ -9,7 +9,7 @@ defmodule Mastery.Boundary.TemplateValidator do
     |> require(fields, :category, &validate_name/1)
     |> optional(fields, :instructions, &validate_instructions/1)
     |> require(fields, :raw, &validate_raw/1)
-    |> require(fields, :generator, &validate_generators/1)
+    |> require(fields, :generators, &validate_generators/1)
     |> require(fields, :checker, &validate_checker/1)
   end
 
@@ -21,7 +21,7 @@ defmodule Mastery.Boundary.TemplateValidator do
   def validate_instructions(_instructions), do: {:error, "Must be a string"}
 
   def validate_raw(raw) when is_binary(raw) do
-    check(String.match?(raw, ~r{S}), {:error, "Can't be blank"})
+    check(String.match?(raw, ~r{\S}), {:error, "Can't be blank"})
   end
 
   def validate_raw(_raw), do: {:error, "Must be a string"}
