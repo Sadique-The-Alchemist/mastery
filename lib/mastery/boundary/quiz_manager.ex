@@ -13,7 +13,7 @@ defmodule Mastery.Boundary.QuizManager do
   def lookup_quiz_by_title(manager \\ __MODULE__, quiz_title) do
     GenServer.call(manager, {:lookup_quiz_by_title, quiz_title})
   end
-
+  
   def init(quizzes) when is_map(quizzes) do
     {:ok, quizzes}
   end
