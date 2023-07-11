@@ -16,7 +16,6 @@ defmodule Mastery.Core.Quiz do
 
   def add_template(quiz, fields) do
     template = Template.new(fields)
-
     templates = update_in(quiz.templates, [template.category], &add_to_list_or_nil(&1, template))
     %{quiz | templates: templates}
   end

@@ -6,7 +6,7 @@ defmodule Mastery.Boundary.QuizSession do
   def child_spec({quiz, email}) do
     %{
       id: {__MODULE__, {quiz.title, email}},
-      start: {__MODULE__, :start_link, {quiz, email}},
+      start: {__MODULE__, :start_link, [{quiz, email}]},
       restart: :temporary
     }
   end
@@ -16,7 +16,7 @@ defmodule Mastery.Boundary.QuizSession do
   end
 
   def take_quiz(quiz, email) do
-    DynamicSupervisor.start_link(Mastery.Supervisor.QuizSession, {__MODULE__, {quiz, email}})
+    DynamicSupervisor.start_child(Mastery.Supervisor.QuizSession, {__MODULE__, {quiz, email}})
   end
 
   def init({quiz, email}) do
@@ -30,6 +30,24 @@ defmodule Mastery.Boundary.QuizSession do
   def answer_question(name, answer) do
     GenServer.call(via(name), {:answer_question, answer})
   end
+
+  def active_session_for(quiz_title) do
+    Mastery.Supervisor.QuizSession
+    |> DynamicSupervisor.which_children()
+    |> Enum.filter(&child_pid?/1)
+    |> Enum.flat_map(&active_sessions(&1, quiz_title))
+  end
+
+  defp child_pid?({:undefined, pid, :worker, [__MODULE__]}) when is_pid(pid), do: true
+  defp child_pid?(_child), do: false
+
+  defp active_sessions({:undefined, pid, :worker, [__MODULE__]}, quiz_title) do
+    Mastery.Registry.QuizSession
+    |> Registry.keys(pid)
+    |> Enum.filter(fn {title, _email} -> title == quiz_title end)
+  end
+
+  def end_session(names), do: Enum.each(names, fn name -> GenServer.stop(via(name)) end)
 
   def handle_call(:select_question, _from, {quiz, email}) do
     quiz = Quiz.select_question(quiz)
@@ -50,6 +68,6 @@ defmodule Mastery.Boundary.QuizSession do
   end
 
   def via({_title, _email} = name) do
-    {:via, Registry, Mastery.Registry.QuizSession, name}
+    {:via, Registry, {Mastery.Registry.QuizSession, name}}
   end
 end
