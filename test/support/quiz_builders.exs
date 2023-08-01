@@ -9,10 +9,10 @@ defmodule QuizBuilders do
   alias Mastery.Core.{Template, Question, Quiz}
 
   def double_digit_addition_template_fields() do
-    template_fields(name: :double_digit_addition, generators: addition_generator(double_digits()))
+    template_fields(name: :double_digit_addition, generators: addition_generators(double_digits()))
   end
 
-  def addition_generator(left, right \\ nil) do
+  def addition_generators(left, right \\ nil) do
     %{left: left, right: right || left}
   end
 
@@ -31,7 +31,7 @@ defmodule QuizBuilders do
         category: :addition,
         instructions: "Add the numbers",
         raw: "<%= @left %> + <%= @right %> ",
-        generators: addition_generator(single_digits()),
+        generators: addition_generators(single_digits()),
         checker: &addition_checker/2
       ],
       ovverides
